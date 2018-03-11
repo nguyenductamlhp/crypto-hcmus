@@ -35,8 +35,7 @@
             </tree>
         </field>
     </record>
-    
-    <menuitem id="menu_crypto" name="Mã hóa và ứng dụng" sequence="19"/>
+
     <record id="action_statistic_vi" model="ir.actions.act_window">
         <field name="name">Statisticter</field>
         <field name="res_model">statisticter.vi</field>
