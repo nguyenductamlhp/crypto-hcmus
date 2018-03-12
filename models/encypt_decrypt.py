@@ -13,6 +13,13 @@ import  Crypto.Util.Counter
 import base64
 import hashlib
 
+mode = {
+    'ecb': AES.MODE_ECB,
+    'cfb': AES.MODE_CFB,
+    'ofb': AES.MODE_OFB,
+    'cbc': AES.MODE_CBC,
+}
+
 class EncryptDecrypt(models.Model):
 
     _name = 'encrypt.decrypt'
@@ -25,7 +32,6 @@ class EncryptDecrypt(models.Model):
             ('cfb', 'CFB'),
             ('ofb', 'OFB'),
             ('cbc', 'CBC'),
-            ('ctr', 'CTR'),
         ]
     )
     bs = fields.Integer("BS", default=32)
@@ -45,30 +51,18 @@ class EncryptDecrypt(models.Model):
         print self
         if not self.text_encrypt:
             return None
-        mode = None
-        if self.mode == 'ecb':
-            mode = AES.MODE_ECB
-        elif self.mode == 'cfb':
-            mode = AES.MODE_CFB
-        elif self.mode == 'ofb':
-            mode = AES.MODE_OFB
-        elif self.mode == 'cbc':
-            mode =  AES.MODE_CBC
-        elif self.mode == 'ctr':
-            mode = AES.MODE_CTR
-        if not mode:
-            return
         key = hashlib.sha256(self.key.encode()).digest()
 
-        print ">>> self.key", self.key, len(self.key), sys.getsizeof(self.key)
         raw = self._pad(self.text_encrypt)
         iv = Random.new().read(AES.block_size)
-        cipher = AES.new(key, AES.MODE_CBC, iv)
+        cipher = AES.new(key, mode[self.mode], iv)
         self.text_decrypt = base64.b64encode(iv + cipher.encrypt(raw))
 
     def decrypt_text(self):
+        if not self.text_decrypt:
+            return
         key = hashlib.sha256(self.key.encode()).digest()
         enc = base64.b64decode(self.text_decrypt)
         iv = enc[:AES.block_size]
-        cipher = AES.new(key, AES.MODE_CBC, iv)
+        cipher = AES.new(key, mode[self.mode], iv)
         self.text_encrypt = self._unpad(self, cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
