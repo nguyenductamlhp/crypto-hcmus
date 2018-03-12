@@ -6,27 +6,34 @@
         <field name="model">encrypt.decrypt</field>
         <field name="arch" type="xml">
             <form>
-                <header>
-                    <button string="Encrypt" type="object" name="encrypt_text" class="oe_highlight"/>
-                    <button string="Decrypt" type="object" name="decrypt_text" class="oe_highlight"/>
-                </header>
-                <h1>
-                    <field name="name" />
-                </h1>
-                <group>
+                <sheet>
                     <group>
-                        <field name="mode" required="1"/>
-                        <field name="key" required="1"/>
-                    </group>
-                </group>
-                <group>
-                    <group>
-                        <field name="text_encrypt"/>
+                        <h1>
+                            <field name="name" />
+                        </h1>
                     </group>
                     <group>
-                        <field name="text_decrypt"/>
+                        <group>
+                            <field name="action" required="1"/>
+                            <field name="mode" required="1"/>
+                            <field name="key" required="1"/>
+                        </group>
                     </group>
-                </group>
+                    <group>
+                        <field name="input_text"/>
+                    </group>
+                    <group>
+                        <group>
+                            <button string="Encrypt" type="object" name="encrypt_text" class="oe_highlight"
+                                attrs="{'invisible':[('action', '=', 'decrypt')]}"/>
+                            <button string="Decrypt" type="object" name="decrypt_text" class="oe_highlight"
+                                attrs="{'invisible':[('action', '=', 'encrypt')]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="output_text" readonly="0"/>
+                    </group>
+                </sheet>
             </form>
         </field>
     </record>

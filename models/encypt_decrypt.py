@@ -25,6 +25,15 @@ class EncryptDecrypt(models.Model):
     _name = 'encrypt.decrypt'
 
     name = fields.Char("Name", required=True)
+    action = fields.Selection(
+        string="Action",
+        selection=[
+            ('encrypt', 'Encrypt'),
+            ('decrypt', 'Decrypt'),
+        ],
+        required=True,
+        default='encrypt'
+    )
     mode = fields.Selection(
         string="Mode",
         selection=[
@@ -36,8 +45,8 @@ class EncryptDecrypt(models.Model):
     )
     bs = fields.Integer("BS", default=32)
     key = fields.Char("Key", required=True)
-    text_encrypt = fields.Text("Text Encrypt")
-    text_decrypt = fields.Text("Text Decrypt")
+    input_text = fields.Text("Text Input")
+    output_text = fields.Text("Text Output")
 
     def _pad(self, s):
         return s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs)
@@ -49,20 +58,20 @@ class EncryptDecrypt(models.Model):
 
     def encrypt_text(self):
         print self
-        if not self.text_encrypt:
+        if not self.input_text:
             return None
         key = hashlib.sha256(self.key.encode()).digest()
 
-        raw = self._pad(self.text_encrypt)
+        raw = self._pad(self.input_text)
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(key, mode[self.mode], iv)
-        self.text_decrypt = base64.b64encode(iv + cipher.encrypt(raw))
+        self.output_text = base64.b64encode(iv + cipher.encrypt(raw))
 
     def decrypt_text(self):
-        if not self.text_decrypt:
+        if not self.input_text:
             return
         key = hashlib.sha256(self.key.encode()).digest()
-        enc = base64.b64decode(self.text_decrypt)
+        enc = base64.b64decode(self.input_text)
         iv = enc[:AES.block_size]
         cipher = AES.new(key, mode[self.mode], iv)
-        self.text_encrypt = self._unpad(self, cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
+        self.output_text = self._unpad(self, cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
